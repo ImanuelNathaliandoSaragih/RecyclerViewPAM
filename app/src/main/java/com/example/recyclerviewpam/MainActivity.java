@@ -3,6 +3,9 @@ package com.example.recyclerviewpam;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,43 +17,61 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private DataAdapter dataAdapter;
     private List<DataModel> dataList;
-    private Button addButton;
-    private int n = 0;
+    private Button addButton, clearButton;
+    private DatabaseHelper databaseHelper;
+    private EditText inputField;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Initialize DatabaseHelper
+        databaseHelper = new DatabaseHelper(this);
+
         // Initialize RecyclerView and list
         recyclerView = findViewById(R.id.recyclerView);
+        inputField = findViewById(R.id.inputField);
         addButton = findViewById(R.id.addButton);
-        dataList = new ArrayList<>();
+        clearButton = findViewById(R.id.clearButton);
 
-        // Add initial static data
-        dataList.add(new DataModel("Imanuel Nathaliando Saragih"));
-        dataList.add(new DataModel("215150407111028"));
-        dataList.add(new DataModel("Pemrograman Aplikasi Mobile - A"));
+        // Retrieve data from SQLite database
+        dataList = databaseHelper.getAllData();
 
         // Set up RecyclerView with the adapter
         dataAdapter = new DataAdapter(dataList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(dataAdapter);
 
-        // Handle the Add Button click
+        // Handle the Add Button click to insert data into the database and update RecyclerView
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(n==0) {
-                    dataAdapter.addData("Imanuel Nathaliando Saragih (Add Varian 1)");
-                    n++;
-                }else if (n==1) {
-                    dataAdapter.addData("215150407111028 (Add Varian 2)");
-                    n++;
-                }else if (n==2) {
-                    dataAdapter.addData("Pemrograman Aplikasi Mobile - A (Add Varian 3)");
-                    n=0;
+                String newItem = inputField.getText().toString();
+
+                if (!newItem.isEmpty()) {
+                    // Add data to SQLite database
+                    boolean isAdded = databaseHelper.addData(newItem);
+                    if (isAdded) {
+                        // Update list and RecyclerView
+                        dataList.add(new DataModel(newItem));
+                        dataAdapter.notifyItemInserted(dataList.size() - 1);
+                        inputField.setText("");  // Clear the input field
+                    } else {
+                        Toast.makeText(MainActivity.this, "Error adding data", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(MainActivity.this, "Please enter data", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+        clearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                databaseHelper.deleteAllData();  // Clear the database
+                dataList.clear();  // Clear the list in the RecyclerView
+                dataAdapter.notifyDataSetChanged();  // Notify the adapter about data changes
+                Toast.makeText(MainActivity.this, "All data cleared", Toast.LENGTH_SHORT).show();
             }
         });
     }
