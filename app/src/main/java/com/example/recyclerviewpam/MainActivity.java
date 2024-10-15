@@ -26,37 +26,30 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize DatabaseHelper
         databaseHelper = new DatabaseHelper(this);
 
-        // Initialize RecyclerView and list
         recyclerView = findViewById(R.id.recyclerView);
         inputField = findViewById(R.id.inputField);
         addButton = findViewById(R.id.addButton);
         clearButton = findViewById(R.id.clearButton);
 
-        // Retrieve data from SQLite database
         dataList = databaseHelper.getAllData();
 
-        // Set up RecyclerView with the adapter
         dataAdapter = new DataAdapter(dataList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(dataAdapter);
 
-        // Handle the Add Button click to insert data into the database and update RecyclerView
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String newItem = inputField.getText().toString();
 
                 if (!newItem.isEmpty()) {
-                    // Add data to SQLite database
                     boolean isAdded = databaseHelper.addData(newItem);
                     if (isAdded) {
-                        // Update list and RecyclerView
                         dataList.add(new DataModel(newItem));
                         dataAdapter.notifyItemInserted(dataList.size() - 1);
-                        inputField.setText("");  // Clear the input field
+                        inputField.setText("");
                     } else {
                         Toast.makeText(MainActivity.this, "Error adding data", Toast.LENGTH_SHORT).show();
                     }
@@ -68,9 +61,9 @@ public class MainActivity extends AppCompatActivity {
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                databaseHelper.deleteAllData();  // Clear the database
-                dataList.clear();  // Clear the list in the RecyclerView
-                dataAdapter.notifyDataSetChanged();  // Notify the adapter about data changes
+                databaseHelper.deleteAllData();
+                dataList.clear();
+                dataAdapter.notifyDataSetChanged();
                 Toast.makeText(MainActivity.this, "All data cleared", Toast.LENGTH_SHORT).show();
             }
         });

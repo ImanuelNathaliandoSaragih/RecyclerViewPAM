@@ -34,7 +34,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Method to add data to SQLite database
     public boolean addData(String name) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -48,7 +47,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DELETE FROM " + TABLE_NAME);  // Deletes all rows from the table
     }
 
-    // Method to get all data from SQLite database
     public List<DataModel> getAllData() {
         List<DataModel> dataList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
